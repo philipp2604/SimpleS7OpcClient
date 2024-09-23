@@ -88,30 +88,9 @@ public class S7OpcClient : LibUA.Client
         }
     }
 
-    public bool? ReadBool(string identifier, ushort namespaceId = 3, bool addQuotationMarks = true)
+    public object? ReadSingleTagFromTable(string tagName, PlcDataType dataType, ushort namespaceId = 3)
     {
-        if(addQuotationMarks)
-            identifier = "\"" + identifier + "\"";
-
-        base.Read(new ReadValueId[]
-        {
-            new ReadValueId(new NodeId(namespaceId, identifier), NodeAttribute.Value, null, new QualifiedName())
-        }, out DataValue[] values);
-
-        if(values.Length == 1)
-        {
-            var boolValue = values[0].Value as bool?;
-            if (boolValue != null)
-                return (bool)boolValue;
-        }
-
-        return null;
-    }
-
-    public object? ReadTag(string identifier, PlcDataType dataType, ushort namespaceId = 3, bool addQuotationMarks = true)
-    {
-        if (addQuotationMarks)
-            identifier = "\"" + identifier + "\"";
+        string identifier = "\"" + tagName + "\"";
 
         base.Read(new ReadValueId[]
         {
@@ -121,32 +100,202 @@ public class S7OpcClient : LibUA.Client
         if (values.Length == 0)
             return null;
 
-        switch(dataType)
+        if (values.Length == 1)
+            return ReadSingleVar(dataType, values[0], false);
+
+        throw new InvalidDataException();
+    }
+
+    public object? ReadSingleVarFromDb(string varName, string dbName, PlcDataType dataType, bool isArray = false, bool globalDb = true, ushort namespaceId = 3)
+    {
+        string identifier = $"\"{dbName}\".\"{varName}\"";
+
+        base.Read(new ReadValueId[]
+        {
+        new ReadValueId(new NodeId(namespaceId, identifier), NodeAttribute.Value, null, new QualifiedName())
+        }, out DataValue[] values);
+
+        if (values.Length == 0)
+            return null;
+
+        if (values.Length == 1)
+            return ReadSingleVar(dataType, values[0], isArray);
+
+        throw new InvalidDataException();
+    }
+
+    private object? ReadSingleVar(PlcDataType dataType, DataValue value, bool isArray = false)
+    {
+        switch (dataType)
         {
             case PlcDataType.Invalid:
                 return null;
             case PlcDataType.Bool:
             {
-                return values[0].Value as bool?;
+                return isArray ? value.Value as bool[] : value.Value as bool?;
             }
             case PlcDataType.Byte:
             {
-                return values[0].Value as byte?;
+                return isArray ? value.Value as byte[] : value.Value as byte?;
             }
             case PlcDataType.Word:
             {
-                return values[0].Value as UInt16?;
+                return isArray ? value.Value as UInt16[] : value.Value as UInt16?;
+            }
+            case PlcDataType.DWord:
+            {
+                return isArray ? value.Value as UInt32[] : value.Value as UInt32?;
             }
             case PlcDataType.LWord:
             {
-                return values[0].Value as UInt64?;
+                return isArray ? value.Value as UInt64[] : value.Value as UInt64?;
             }
             case PlcDataType.SInt:
             {
-                return values[0].Value as sbyte?;
+                return isArray ? value.Value as sbyte[] : value.Value as sbyte?;
+            }
+            case PlcDataType.Int:
+            {
+                return isArray ? value.Value as Int16[] : value.Value as Int16?;
+            }
+            case PlcDataType.DInt:
+            {
+                return isArray ? value.Value as Int32[] : value.Value as Int32?;
+            }
+            case PlcDataType.USInt:
+            {
+                return isArray ? value.Value as byte[] : value.Value as byte?;
+            }
+            case PlcDataType.UInt:
+            {
+                return isArray ? value.Value as UInt16[] : value.Value as UInt16?;
+            }
+            case PlcDataType.UDInt:
+            {
+                return isArray ? value.Value as UInt32[] : value.Value as UInt32?;
+            }
+            case PlcDataType.LInt:
+            {
+                return isArray ? value.Value as Int64[] : value.Value as Int64?;
+            }
+            case PlcDataType.ULInt:
+            {
+                return isArray ? value.Value as UInt64[] : value.Value as UInt64?;
+            }
+            case PlcDataType.Real:
+            {
+                return isArray ? value.Value as float[] : value.Value as float?;
+            }
+            case PlcDataType.LReal:
+            {
+                return isArray ? value.Value as float[] : value.Value as float?;
+            }
+            case PlcDataType.S5Time:
+            {
+                return isArray ? value.Value as UInt16[] : value.Value as UInt16?;
+            }
+            case PlcDataType.Time:
+            {
+                return isArray ? value.Value as Int32[] : value.Value as Int32?;
+            }
+            case PlcDataType.LTime:
+            {
+                return isArray ? value.Value as Int32[] : value.Value as Int32?;
+            }
+            case PlcDataType.Char:
+            {
+                return isArray ? value.Value as byte[] : value.Value as byte?;
+            }
+            case PlcDataType.WChar:
+            {
+                return isArray ? value.Value as UInt16[] : value.Value as UInt16?;
+            }
+            case PlcDataType.String:
+            {
+                return isArray ? value.Value as string[] : value.Value as string;
+            }
+            case PlcDataType.WString:
+            {
+                return isArray ? value.Value as string[] : value.Value as string;
+            }
+            case PlcDataType.Date:
+            {
+                return isArray ? value.Value as UInt16[] : value.Value as UInt16?;
+            }
+            case PlcDataType.Time_Of_Day:
+            {
+                return isArray ? value.Value as UInt32[] : value.Value as UInt32?;
+            }
+            case PlcDataType.LTime_Of_Day:
+            {
+                return isArray ? value.Value as UInt64[] : value.Value as UInt64?;
+            }
+            case PlcDataType.Date_And_Time:
+            {
+                var result = value.Value as byte[];
+                if (result == null || !isArray)
+                    return result;
+
+                int rows = result.Length / 8;
+                byte[,] resultArray = new byte[rows, 8];
+
+                for (int i = 0; i < rows; i++)
+                {
+                    for (int j = 0; j < 8; j++)
+                    {
+                        resultArray[i, j] = result[i * 8 + j];
+                    }
+                }
+
+                return resultArray;
+            }
+            case PlcDataType.LDT:
+            {
+                return isArray ? value.Value as DateTime[] : value.Value as DateTime?;
+            }
+            case PlcDataType.DTL:
+            {
+                if (!isArray)
+                {
+                    if (value.Value is ExtensionObject eo)
+                    {
+                        return eo.Body as byte[];
+                    }
+                    return null;
+                }
+
+                if (value.Value is ExtensionObject[] eoArray)
+                {
+                    int rows = eoArray.Length;
+                    byte[,] resultArray = new byte[rows, 12];
+
+                    for (int i = 0; i < rows; i++)
+                    {
+                        for (int j = 0; j < 12; j++)
+                        {
+                            resultArray[i, j] = eoArray[i].Body[j];
+                        }
+                    }
+
+                    return resultArray;
+                }
+
+                return null;
+            }
+            case PlcDataType.Timer:
+            {
+                return isArray ? value.Value as UInt16[] : value.Value as UInt16?;
+            }
+            case PlcDataType.Counter:
+            {
+                return isArray ? value.Value as UInt16[] : value.Value as UInt16?;
+            }
+            case PlcDataType.Array:
+            {
+                throw new NotImplementedException();
             }
             default:
-                return null;
+                throw new NotImplementedException();
         }
     }
 }

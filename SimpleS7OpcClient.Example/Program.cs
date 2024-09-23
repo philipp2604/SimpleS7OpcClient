@@ -17,8 +17,9 @@ internal class Program
         client.Connect();
 
         Console.WriteLine("Conntected");
-        var res = client.ReadTag("TestSInt", Constants.PlcDataType.SInt);
+        var res = client.ReadSingleVarFromDb("TestDtl", "DataDb", Constants.PlcDataType.DTL, true);
+        //res = client.ReadTagFromTable("TestDate", Constants.PlcDataType.Date);
         client.Disconnect();
-        Console.WriteLine(((sbyte)res).ToString());
+        Console.WriteLine(((bool)res).ToString());
     }
 }

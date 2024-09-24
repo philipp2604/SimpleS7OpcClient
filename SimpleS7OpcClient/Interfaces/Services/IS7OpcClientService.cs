@@ -8,11 +8,11 @@ public interface IS7OpcClientService
 
     public void Disconnect();
 
-    public object? ReadSingleTagFromTable(string tagName, PlcDataType dataType, ushort namespaceId = 3);
+    public object? ReadSingleTableTag(string tagName, PlcDataType dataType, ushort namespaceId = 3);
 
-    public object? ReadSingleVarFromDb(string varName, string dbName, PlcDataType dataType, bool isArray = false, ushort namespaceId = 3);
+    public object? ReadSingleDbVar(string varName, string dbName, PlcDataType dataType, bool isArray = false, ushort namespaceId = 3);
 
-    public void WriteSingleTagToTable(string tagName, PlcDataType dataType, object value, ushort namespaceId = 3);
+    public void WriteSingleTableTag(string tagName, PlcDataType dataType, object value, ushort namespaceId = 3);
 
-    public void WriteSingleVarToDb(string varName, string dbName, PlcDataType dataType, object value, bool isArray = false, ushort namespaceId = 3);
+    public void WriteSingleDbVar(string varName, string dbName, PlcDataType dataType, object value, bool isArray = false, ushort namespaceId = 3);
 }

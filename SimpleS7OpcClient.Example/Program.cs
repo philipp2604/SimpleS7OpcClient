@@ -24,14 +24,14 @@ internal static class Program
         Console.WriteLine("Conntected");
 
         //Read tag 'TestInput' of type 'Bool'
-        bool? testInput = (bool?)s7Service.ReadSingleTagFromTable("TestInput", PlcDataType.Bool);
+        bool? testInput = (bool?)s7Service.ReadSingleTableTag("TestInput", PlcDataType.Bool);
         Console.WriteLine($"TestInput value: {testInput}");
 
         //Write tag 'TestOutput' of type 'Word'
-        s7Service.WriteSingleTagToTable("TestOutput", PlcDataType.Word, (ushort)15);
+        s7Service.WriteSingleTableTag("TestOutput", PlcDataType.Word, (ushort)15);
 
         //Read array named 'StringArray', an array of type 'String', from DataBlock 'DataDb'
-        string[]? testStringArray = (string[]?)s7Service.ReadSingleVarFromDb("TestStringArray", "DataDb", PlcDataType.String, true);
+        string[]? testStringArray = (string[]?)s7Service.ReadSingleDbVar("TestStringArray", "DataDb", PlcDataType.String, true);
         Console.WriteLine("TestStringArray values:");
         testStringArray!.ToList().ForEach((x) => Console.WriteLine(x));
 
@@ -42,7 +42,7 @@ internal static class Program
             {1, 1, 1, 1, 1, 1, 1, 1 }, //2001-01-01-01:01:01.010
             {2, 2, 2, 2, 2, 2, 2, 2 } //2002-02-02-02:02:02.020
         };
-        s7Service.WriteSingleVarToDb("TestDateAndTimeArray", "DataDb", PlcDataType.Date_And_Time, dateAndTimeData, true);
+        s7Service.WriteSingleDbVar("TestDateAndTimeArray", "DataDb", PlcDataType.Date_And_Time, dateAndTimeData, true);
 
         s7Service.Disconnect();
         Console.ReadKey();

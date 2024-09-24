@@ -67,7 +67,7 @@ public class S7OpcClientService(S7OpcClient client) : IS7OpcClientService
 
     public void Disconnect() => _client.Disconnect();
 
-    public object? ReadSingleTagFromTable(string tagName, PlcDataType dataType, ushort namespaceId = 3)
+    public object? ReadSingleTableTag(string tagName, PlcDataType dataType, ushort namespaceId = 3)
     {
         if (string.IsNullOrWhiteSpace(tagName))
             throw new ArgumentException("Tag name cannot be null or whitespace.", nameof(tagName));
@@ -86,7 +86,7 @@ public class S7OpcClientService(S7OpcClient client) : IS7OpcClientService
             : throw new InvalidDataException("Unexpected number of values returned.");
     }
 
-    public object? ReadSingleVarFromDb(string varName, string dbName, PlcDataType dataType, bool isArray = false, ushort namespaceId = 3)
+    public object? ReadSingleDbVar(string varName, string dbName, PlcDataType dataType, bool isArray = false, ushort namespaceId = 3)
     {
         if (string.IsNullOrWhiteSpace(varName))
             throw new ArgumentException("Variable name cannot be null or whitespace.", nameof(varName));
@@ -108,7 +108,7 @@ public class S7OpcClientService(S7OpcClient client) : IS7OpcClientService
             : throw new InvalidDataException("Unexpected number of values returned.");
     }
 
-    public void WriteSingleTagToTable(string tagName, PlcDataType dataType, object value, ushort namespaceId = 3)
+    public void WriteSingleTableTag(string tagName, PlcDataType dataType, object value, ushort namespaceId = 3)
     {
         if (string.IsNullOrWhiteSpace(tagName))
             throw new ArgumentException("Tag name cannot be null or whitespace.", nameof(tagName));
@@ -131,7 +131,7 @@ public class S7OpcClientService(S7OpcClient client) : IS7OpcClientService
             throw new InvalidOperationException("Failed to write the value to the PLC.");
     }
 
-    public void WriteSingleVarToDb(string varName, string dbName, PlcDataType dataType, object value, bool isArray = false, ushort namespaceId = 3)
+    public void WriteSingleDbVar(string varName, string dbName, PlcDataType dataType, object value, bool isArray = false, ushort namespaceId = 3)
     {
         if (string.IsNullOrWhiteSpace(varName))
             throw new ArgumentException("Variable name cannot be null or whitespace.", nameof(varName));

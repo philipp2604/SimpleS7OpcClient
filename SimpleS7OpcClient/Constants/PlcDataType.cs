@@ -38,5 +38,6 @@ public enum PlcDataType
     DTL,
     Timer,
     Counter,
-    Array
+    Array,
+    Custom
 }

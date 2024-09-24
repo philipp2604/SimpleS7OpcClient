@@ -4,6 +4,7 @@ using SimpleS7OpcClient.Converters;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Xml.Linq;
 
 namespace SimpleS7OpcClient.Models;
 
@@ -90,7 +91,7 @@ public class S7OpcClient : LibUA.Client
 
     public object? ReadSingleTagFromTable(string tagName, PlcDataType dataType, ushort namespaceId = 3)
     {
-        string identifier = "\"" + tagName + "\"";
+        string identifier = $"\"{tagName}\"";
 
         base.Read(new ReadValueId[]
         {

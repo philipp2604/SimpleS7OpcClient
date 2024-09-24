@@ -1,6 +1,8 @@
-﻿namespace SimpleS7OpcClient.Models;
+﻿using SimpleS7OpcClient.Interfaces.Models;
 
-public class ConnectionSettings(string host, int port, int timeoutMs = 1000, int maxMsgSize = 65535)
+namespace SimpleS7OpcClient.Models;
+
+public class ConnectionSettings(string host, int port, int timeoutMs = 1000, int maxMsgSize = 65535) : IConnectionSettings
 {
     public string Host { get; } = host;
     public int Port { get; } = port;

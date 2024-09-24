@@ -1,6 +1,8 @@
-﻿namespace SimpleS7OpcClient.Models;
+﻿using SimpleS7OpcClient.Interfaces.Models;
 
-public class SessionSettings(string sessionName, int sessionTimeoutMs, bool anonymously)
+namespace SimpleS7OpcClient.Models;
+
+public class SessionSettings(string sessionName, int sessionTimeoutMs, bool anonymously) : ISessionSettings
 {
     public string SessionName { get; } = sessionName;
     public int SessionTimeoutMs { get; } = sessionTimeoutMs;

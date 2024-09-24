@@ -1,39 +1,46 @@
-﻿using SimpleS7OpcClient.Models;
+﻿using SimpleS7OpcClient.Constants;
+using SimpleS7OpcClient.Models;
 using SimpleS7OpcClient.Services;
-using SimpleS7OpcClient.Constants;
 
 namespace SimpleS7OpcClient.Example;
 
 internal static class Program
 {
-    static void Main()
+    private static void Main()
     {
-        Console.WriteLine("Hello, World!");
-
+        //Create S7OpcClient
         var s7Client = new S7OpcClient(
-            new ApplicationDescription("urn:DemoApplication", "uri:DemoApplication", "UA SDK client", ["en"]),
+            new ApplicationDescription("urn:DemoApp", "uri:DemoApp", "DemoApplication", ["en"]),
             new ConnectionSettings("172.168.0.1", 4840),
-            new SecuritySettings(Constants.MessageSecurityMode.None, Constants.SecurityPolicy.None, null, null, null),
+            new SecuritySettings(MessageSecurityMode.None, SecurityPolicy.None, null, null, null),
             new SessionSettings("urn:TestSession", 200, true));
 
+        //Create S7OpcClientService
         var s7Service = new S7OpcClientService(s7Client);
 
+        //Connect to server.
         s7Service.Connect();
-
         Console.WriteLine("Conntected");
-        s7Service.WriteSingleVarToDb("TestString", "DataDb", PlcDataType.String, "Hallo");
-        var res = s7Service.ReadSingleVarFromDb("TestString", "DataDb", PlcDataType.String);
-        Console.WriteLine((string?)res);
-        s7Service.WriteSingleVarToDb("TestString", "DataDb", PlcDataType.String, "Tschuess");
-        res = s7Service.ReadSingleVarFromDb("TestString", "DataDb", PlcDataType.String);
-        Console.WriteLine((string?)res);
 
-        //var res = client.ReadSingleVarFromDb("StringArray", "DataDb", Constants.PlcDataType.String, true);
-        //client.WriteSingleTagToTable("TestReal", Constants.PlcDataType.Real, 15.565f);
-        //client.WriteSingleVarToDb("TestDtl", "DataDb", Constants.PlcDataType.DTL, new byte[12] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, false);
-        //var res = client.ReadSingleVarFromDb("StringArray", "DataDb", Constants.PlcDataType.String, true);
+        //Read tag 'TestInput' of type 'Bool'
+        bool? testInput = (bool?)s7Service.ReadSingleTagFromTable("TestInput", PlcDataType.Bool);
+
+        //Write tag 'TestOutput' of type 'Word'
+        s7Service.WriteSingleTagToTable("TestOutput", PlcDataType.Word, (ushort)15);
+
+        //Read array named 'StringArray', an array of type 'String', from DataBlock 'DataDb'
+        string[]? testStringArray = (string[]?)s7Service.ReadSingleVarFromDb("TestStringArray", "DataDb", PlcDataType.String, true);
+
+        //Write to array named 'TestDateAndTimeArray', an array of type 'Date_And_Time', in 'DataDb'
+        //I recommand using PLC datatype LDT, which is compatible with .net DateTime
+        byte[,] dateAndTimeData = new byte[2, 8]
+        {
+            {1, 1, 1, 1, 1, 1, 1, 1 }, //2001-01-01-01:01:01.010
+            {2, 2, 2, 2, 2, 2, 2, 2 } //2002-02-02-02:02:02.020
+        };
+        s7Service.WriteSingleVarToDb("TestDateAndTimeArray", "DataDb", PlcDataType.Date_And_Time, dateAndTimeData, true);
+
         s7Service.Disconnect();
-        //Console.WriteLine(((string[])res).ToString());
         Console.ReadKey();
     }
 }

@@ -25,12 +25,15 @@ internal static class Program
 
         //Read tag 'TestInput' of type 'Bool'
         bool? testInput = (bool?)s7Service.ReadSingleTagFromTable("TestInput", PlcDataType.Bool);
+        Console.WriteLine($"TestInput value: {testInput}");
 
         //Write tag 'TestOutput' of type 'Word'
         s7Service.WriteSingleTagToTable("TestOutput", PlcDataType.Word, (ushort)15);
 
         //Read array named 'StringArray', an array of type 'String', from DataBlock 'DataDb'
         string[]? testStringArray = (string[]?)s7Service.ReadSingleVarFromDb("TestStringArray", "DataDb", PlcDataType.String, true);
+        Console.WriteLine("TestStringArray values:");
+        testStringArray!.ToList().ForEach((x) => Console.WriteLine(x));
 
         //Write to array named 'TestDateAndTimeArray', an array of type 'Date_And_Time', in 'DataDb'
         //I recommand using PLC datatype LDT, which is compatible with .net DateTime

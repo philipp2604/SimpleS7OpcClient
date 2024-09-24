@@ -1,13 +1,36 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+	 <VersionPrefix>1.0.0</VersionPrefix>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Authors>Philipp Siewert</Authors>
+    <Description>A simplified OPC UA client to communicate with Siemens S7 PLCs.</Description>
+    <Copyright>Philipp Siewert</Copyright>
+    <PackageProjectUrl>https://github.com/philipp2604/SimpleS7OpcClient</PackageProjectUrl>
+    <PackageReadmeFile>PACKAGE-README.md</PackageReadmeFile>
+    <Title>$(AssemblyName)</Title>
+    <RepositoryUrl>https://github.com/philipp2604/SimpleS7OpcClient</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>plc;siemens;s7;s7-1200;s7-1500;opc;opc-ua;opc-client;opc-ua-client;automation;industry</PackageTags>
+    <PackageReleaseNotes>Initial release</PackageReleaseNotes>
+    <AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
+    <FileVersion>$(VersionPrefix)</FileVersion>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <PackageId>philipp2604.$(AssemblyName)</PackageId>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="nauful-LibUA-core" Version="1.0.25" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="PACKAGE-README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

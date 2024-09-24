@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleS7OpcClient", "Simple
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleS7OpcClient.Example", "SimpleS7OpcClient.Example\SimpleS7OpcClient.Example.csproj", "{2A7F0F68-AE24-4668-A6BA-061E9335A46C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibUA", "..\..\..\Downloads\LibUA-master\NET Core\LibUA\LibUA.csproj", "{5A170E0A-87F5-4C0B-BA64-0072BB9C4E06}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{2A7F0F68-AE24-4668-A6BA-061E9335A46C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2A7F0F68-AE24-4668-A6BA-061E9335A46C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2A7F0F68-AE24-4668-A6BA-061E9335A46C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5A170E0A-87F5-4C0B-BA64-0072BB9C4E06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5A170E0A-87F5-4C0B-BA64-0072BB9C4E06}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5A170E0A-87F5-4C0B-BA64-0072BB9C4E06}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5A170E0A-87F5-4C0B-BA64-0072BB9C4E06}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,12 +1,13 @@
 ﻿using LibUA.Core;
 using SimpleS7OpcClient.Constants;
 using SimpleS7OpcClient.Converters;
+using SimpleS7OpcClient.Interfaces.Services;
 using SimpleS7OpcClient.Models;
 using System.Text;
 
 namespace SimpleS7OpcClient.Services;
 
-public class S7OpcClientService(S7OpcClient client)
+public class S7OpcClientService(S7OpcClient client) : IS7OpcClientService
 {
     private readonly S7OpcClient _client = client;
 
@@ -244,7 +245,7 @@ public class S7OpcClientService(S7OpcClient client)
         };
     }
 
-    public static object? TransformWriteValue(object value, PlcDataType dataType, bool isArray = false)
+    private static object? TransformWriteValue(object value, PlcDataType dataType, bool isArray = false)
     {
         return value == null
             ? throw new ArgumentNullException(nameof(value), "Value cannot be null.")

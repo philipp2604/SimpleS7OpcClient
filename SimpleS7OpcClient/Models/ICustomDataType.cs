@@ -8,5 +8,8 @@ using System.Threading.Tasks;
 namespace SimpleS7OpcClient.Models;
 public interface ICustomDataType
 {
+    /*
     public static abstract Dictionary<string, PlcDataType> Members { get; }
+    public static abstract CustomDataType FromByteArray(byte[] bytes);
+    */
 }

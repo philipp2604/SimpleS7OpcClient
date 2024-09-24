@@ -13,7 +13,7 @@ public class S7OpcClient : LibUA.Client
     private ApplicationDescription _applicationDescription;
     private ConnectionSettings _connectionSettings;
     private SecuritySettings _securitySettings;
-    SessionSettings _sessionSettings;
+    private SessionSettings _sessionSettings;
 
     public S7OpcClient(ApplicationDescription appDesc, ConnectionSettings connSettings, SecuritySettings securitySettings, SessionSettings sessionSettings) :
         base(connSettings.Host, connSettings.Port, connSettings.TimeoutMs, connSettings.MaxMessageSize)
@@ -66,8 +66,7 @@ public class S7OpcClient : LibUA.Client
             _sessionSettings.SessionName, _sessionSettings.SessionTimeoutMs
             );
 
-
-        if(_sessionSettings.Anonymously)
+        if (_sessionSettings.Anonymously)
         {
             var policyId = endpointDesc.UserIdentityTokens.First(
                 e => e.TokenType == UserTokenType.Anonymous).PolicyId;
@@ -131,6 +130,7 @@ public class S7OpcClient : LibUA.Client
         {
             case PlcDataType.Invalid:
                 return null;
+
             case PlcDataType.Bool:
             {
                 return isArray ? value.Value as bool[] : value.Value as bool?;
@@ -292,6 +292,173 @@ public class S7OpcClient : LibUA.Client
                 return isArray ? value.Value as UInt16[] : value.Value as UInt16?;
             }
             case PlcDataType.Array:
+            {
+                throw new NotImplementedException();
+            }
+            case PlcDataType.Custom:
+            {
+                throw new NotImplementedException();
+            }
+            default:
+                throw new NotImplementedException();
+        }
+    }
+
+    public void WriteSingleTagToTable(string tagName, PlcDataType dataType, object value, ushort namespaceId = 3)
+    {
+        string identifier = $"\"{tagName}\"";
+
+        object sendVal = TransformWriteValue(value, dataType) ?? throw new ArgumentNullException();
+
+        base.Write(new WriteValue[]
+        {
+            new WriteValue(new NodeId(namespaceId, identifier), NodeAttribute.Value, null, new DataValue(value, StatusCode.Good))
+        }, out uint[] results);
+    }
+
+    public void WriteSingleVarToDb(string varName, string dbName, PlcDataType dataType, object value, bool isArray = false, bool globalDb = true, ushort namespaceId = 3)
+    {
+        string identifier = $"\"{dbName}\".\"{varName}\"";
+
+        object sendVal = TransformWriteValue(value, dataType, isArray) ?? throw new ArgumentNullException();
+
+        base.Write(new WriteValue[]
+        {
+            new WriteValue(new NodeId(namespaceId, identifier), NodeAttribute.Value, null, new DataValue(sendVal, StatusCode.Good))
+        }, out uint[] results);
+    }
+
+    public object? TransformWriteValue(object value, PlcDataType dataType, bool isArray = false)
+    {
+        switch (dataType)
+        {
+            case PlcDataType.Invalid:
+                throw new InvalidDataException();
+            case PlcDataType.Bool:
+            {
+                return value as bool? ?? throw new ArgumentNullException();
+            }
+            case PlcDataType.Byte:
+            {
+                return value as byte? ?? throw new ArgumentNullException();
+            }
+            case PlcDataType.Word:
+            {
+                return isArray ? value as UInt16[] : value as UInt16? ?? throw new ArgumentNullException();
+            }
+            case PlcDataType.DWord:
+            {
+                return isArray ? value as UInt32[] : value as UInt32? ?? throw new ArgumentNullException();
+            }
+            case PlcDataType.LWord:
+            {
+                return isArray ? value as UInt64[] : value as UInt64? ?? throw new ArgumentNullException();
+            }
+            case PlcDataType.SInt:
+            {
+                return isArray ? value as sbyte[] : value as sbyte? ?? throw new ArgumentNullException();
+            }
+            case PlcDataType.Int:
+            {
+                return isArray ? value as Int16[] : value as Int16? ?? throw new ArgumentNullException();
+            }
+            case PlcDataType.DInt:
+            {
+                return isArray ? value as Int32[] : value as Int32? ?? throw new ArgumentNullException();
+            }
+            case PlcDataType.USInt:
+            {
+                return isArray ? value as byte[] : value as byte? ?? throw new ArgumentNullException();
+            }
+            case PlcDataType.UInt:
+            {
+                return isArray ? value as UInt16[] : value as UInt16? ?? throw new ArgumentNullException();
+            }
+            case PlcDataType.UDInt:
+            {
+                return isArray ? value as UInt32[] : value as UInt32? ?? throw new ArgumentNullException();
+            }
+            case PlcDataType.LInt:
+            {
+                return isArray ? value as Int64[] : value as Int64? ?? throw new ArgumentNullException();
+            }
+            case PlcDataType.ULInt:
+            {
+                return isArray ? value as UInt64[] : value as UInt64? ?? throw new ArgumentNullException();
+            }
+            case PlcDataType.Real:
+            {
+                return isArray ? value as float[] : value as float? ?? throw new ArgumentNullException();
+            }
+            case PlcDataType.LReal:
+            {
+                return isArray ? value as float[] : value as float? ?? throw new ArgumentNullException();
+            }
+            case PlcDataType.S5Time:
+            {
+                return isArray ? value as UInt16[] : value as UInt16? ?? throw new ArgumentNullException();
+            }
+            case PlcDataType.Time:
+            {
+                return isArray ? value as Int32[] : value as Int32? ?? throw new ArgumentNullException();
+            }
+            case PlcDataType.LTime:
+            {
+                return isArray ? value as Int32[] : value as Int32? ?? throw new ArgumentNullException();
+            }
+            case PlcDataType.Char:
+            {
+                return isArray ? value as byte[] : value as byte? ?? throw new ArgumentNullException();
+            }
+            case PlcDataType.WChar:
+            {
+                return isArray ? value as UInt16[] : value as UInt16? ?? throw new ArgumentNullException();
+            }
+            case PlcDataType.String:
+            {
+                return isArray ? value as string[] : value as string ?? throw new ArgumentNullException();
+            }
+            case PlcDataType.WString:
+            {
+                return isArray ? value as string[] : value as string ?? throw new ArgumentNullException();
+            }
+            case PlcDataType.Date:
+            {
+                return isArray ? value as UInt16[] : value as UInt16? ?? throw new ArgumentNullException();
+            }
+            case PlcDataType.Time_Of_Day:
+            {
+                return isArray ? value as UInt32[] : value as UInt32? ?? throw new ArgumentNullException();
+            }
+            case PlcDataType.LTime_Of_Day:
+            {
+                return isArray ? value as UInt64[] : value as UInt64? ?? throw new ArgumentNullException();
+            }
+            case PlcDataType.Date_And_Time:
+            {
+                throw new NotImplementedException();
+            }
+            case PlcDataType.LDT:
+            {
+                throw new NotImplementedException();
+            }
+            case PlcDataType.DTL:
+            {
+                throw new NotImplementedException();
+            }
+            case PlcDataType.Timer:
+            {
+                return isArray ? value as UInt16[] : value as UInt16? ?? throw new ArgumentNullException();
+            }
+            case PlcDataType.Counter:
+            {
+                return isArray ? value as UInt16[] : value as UInt16? ?? throw new ArgumentNullException();
+            }
+            case PlcDataType.Array:
+            {
+                throw new NotImplementedException();
+            }
+            case PlcDataType.Custom:
             {
                 throw new NotImplementedException();
             }

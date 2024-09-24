@@ -17,9 +17,12 @@ internal class Program
         client.Connect();
 
         Console.WriteLine("Conntected");
-        var res = client.ReadSingleVarFromDb("MyTestDataType", "DataDb", Constants.PlcDataType.String, true);
-        //res = client.ReadTagFromTable("TestDate", Constants.PlcDataType.Date);
+        //var res = client.ReadSingleVarFromDb("StringArray", "DataDb", Constants.PlcDataType.String, true);
+        //client.WriteSingleTagToTable("TestReal", Constants.PlcDataType.Real, 15.565f);
+        client.WriteSingleVarToDb("StringArray", "DataDb", Constants.PlcDataType.String, new string[] { "Hallo", "Moin" }, true);
+        var res = client.ReadSingleVarFromDb("StringArray", "DataDb", Constants.PlcDataType.String, true);
         client.Disconnect();
-        Console.WriteLine(((bool)res).ToString());
+        Console.WriteLine(((string[])res).ToString());
+        Console.ReadKey();
     }
 }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace SimpleS7OpcClient.Models
 {
+    /*
     public class CustomDataType : ICustomDataType
     {
         public CustomDataType()
@@ -24,7 +25,7 @@ namespace SimpleS7OpcClient.Models
         public static Dictionary<string, PlcDataType> Members { get; } = new Dictionary<string, PlcDataType>{ { "boolValue", PlcDataType.Bool }, { "intValue", PlcDataType.Int } };
         public Dictionary<string, object?> Values { get; } = new Dictionary<string, object?>();
 
-        /*
+        
         public static CustomDataType FromByteArray(byte[] bytes)
         {
             var newDt = new CustomDataType();
@@ -63,6 +64,6 @@ namespace SimpleS7OpcClient.Models
                 }
 
             }
-        }*/
-    }
+        }
+    }*/
 }

@@ -6,14 +6,9 @@ using System.Text;
 
 namespace SimpleS7OpcClient.Services;
 
-public class S7OpcClientService
+public class S7OpcClientService(S7OpcClient client)
 {
-    private readonly S7OpcClient _client;
-
-    public S7OpcClientService(S7OpcClient client)
-    {
-        _client = client;
-    }
+    private readonly S7OpcClient _client = client;
 
     public void Connect()
     {
@@ -85,13 +80,12 @@ public class S7OpcClientService
 
         _client.Read(readValueIds, out DataValue[] values);
 
-        if (values.Length == 1)
-            return TransformReadValue(dataType, values[0], false);
-
-        throw new InvalidDataException("Unexpected number of values returned.");
+        return values.Length == 1
+            ? TransformReadValue(dataType, values[0], false)
+            : throw new InvalidDataException("Unexpected number of values returned.");
     }
 
-    public object? ReadSingleVarFromDb(string varName, string dbName, PlcDataType dataType, bool isArray = false, bool globalDb = true, ushort namespaceId = 3)
+    public object? ReadSingleVarFromDb(string varName, string dbName, PlcDataType dataType, bool isArray = false, ushort namespaceId = 3)
     {
         if (string.IsNullOrWhiteSpace(varName))
             throw new ArgumentException("Variable name cannot be null or whitespace.", nameof(varName));
@@ -108,10 +102,9 @@ public class S7OpcClientService
 
         _client.Read(readValueIds, out DataValue[] values);
 
-        if (values.Length == 1)
-            return TransformReadValue(dataType, values[0], false);
-
-        throw new InvalidDataException("Unexpected number of values returned.");
+        return values.Length == 1
+            ? TransformReadValue(dataType, values[0], isArray)
+            : throw new InvalidDataException("Unexpected number of values returned.");
     }
 
     public void WriteSingleTagToTable(string tagName, PlcDataType dataType, object value, ushort namespaceId = 3)
@@ -137,7 +130,7 @@ public class S7OpcClientService
             throw new InvalidOperationException("Failed to write the value to the PLC.");
     }
 
-    public void WriteSingleVarToDb(string varName, string dbName, PlcDataType dataType, object value, bool isArray = false, bool globalDb = true, ushort namespaceId = 3)
+    public void WriteSingleVarToDb(string varName, string dbName, PlcDataType dataType, object value, bool isArray = false, ushort namespaceId = 3)
     {
         if (string.IsNullOrWhiteSpace(varName))
             throw new ArgumentException("Variable name cannot be null or whitespace.", nameof(varName));
@@ -163,7 +156,7 @@ public class S7OpcClientService
             throw new InvalidOperationException("Failed to write the value to the PLC.");
     }
 
-    private object? TransformReadDateAndTime(DataValue value, bool isArray)
+    private static object? TransformReadDateAndTime(DataValue value, bool isArray)
     {
         var result = value.Value as byte[];
         if (result == null || !isArray)
@@ -176,22 +169,18 @@ public class S7OpcClientService
         {
             for (int j = 0; j < 8; j++)
             {
-                resultArray[i, j] = result[i * 8 + j];
+                resultArray[i, j] = result[(i * 8) + j];
             }
         }
 
         return resultArray;
     }
 
-    private object? TransformReadDTL(DataValue value, bool isArray)
+    private static object? TransformReadDTL(DataValue value, bool isArray)
     {
         if (!isArray)
         {
-            if (value.Value is ExtensionObject eo)
-            {
-                return eo.Body as byte[];
-            }
-            return null;
+            return value.Value is ExtensionObject eo ? eo.Body as byte[] : (object?)null;
         }
 
         if (value.Value is ExtensionObject[] eoArray)
@@ -213,12 +202,11 @@ public class S7OpcClientService
         return null;
     }
 
-    private object? TransformReadValue(PlcDataType dataType, DataValue value, bool isArray = false)
+    private static object? TransformReadValue(PlcDataType dataType, DataValue value, bool isArray = false)
     {
-        if (value == null)
-            throw new ArgumentNullException(nameof(value), "DataValue cannot be null.");
-
-        return dataType switch
+        return value == null
+            ? throw new ArgumentNullException(nameof(value), "DataValue cannot be null.")
+            : dataType switch
         {
             PlcDataType.Invalid => null,
             PlcDataType.Bool => isArray ? value.Value as bool[] : value.Value as bool?,
@@ -256,12 +244,11 @@ public class S7OpcClientService
         };
     }
 
-    public object? TransformWriteValue(object value, PlcDataType dataType, bool isArray = false)
+    public static object? TransformWriteValue(object value, PlcDataType dataType, bool isArray = false)
     {
-        if (value == null)
-            throw new ArgumentNullException(nameof(value), "Value cannot be null.");
-
-        return dataType switch
+        return value == null
+            ? throw new ArgumentNullException(nameof(value), "Value cannot be null.")
+            : dataType switch
         {
             PlcDataType.Invalid => throw new InvalidDataException(),
             PlcDataType.Bool => value as bool?,

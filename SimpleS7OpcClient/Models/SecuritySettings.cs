@@ -4,20 +4,11 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace SimpleS7OpcClient.Models;
 
-public class SecuritySettings
+public class SecuritySettings(MessageSecurityMode msgSecurityMode, SecurityPolicy securityPolicy, byte[]? serverCertificate, X509Certificate2? applicationCertificate, RSA? applicationPrivateKey)
 {
-    public SecuritySettings(MessageSecurityMode msgSecurityMode, SecurityPolicy securityPolicy, byte[]? serverCertificate, X509Certificate2? applicationCertificate, RSA? applicationPrivateKey)
-    {
-        MessageSecurityMode = msgSecurityMode;
-        SecurityPolicy = securityPolicy;
-        ServerCertificate = serverCertificate;
-        ApplicationCertificate = applicationCertificate;
-        ApplicationPrivateKey = applicationPrivateKey;
-    }
-
-    public MessageSecurityMode MessageSecurityMode { get; }
-    public SecurityPolicy SecurityPolicy { get; }
-    public byte[]? ServerCertificate { get; }
-    public X509Certificate2? ApplicationCertificate { get; }
-    public RSA? ApplicationPrivateKey { get; }
+    public MessageSecurityMode MessageSecurityMode { get; } = msgSecurityMode;
+    public SecurityPolicy SecurityPolicy { get; } = securityPolicy;
+    public byte[]? ServerCertificate { get; } = serverCertificate;
+    public X509Certificate2? ApplicationCertificate { get; } = applicationCertificate;
+    public RSA? ApplicationPrivateKey { get; } = applicationPrivateKey;
 }

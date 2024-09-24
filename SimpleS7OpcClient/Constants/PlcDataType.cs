@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace SimpleS7OpcClient.Constants;
 
-namespace SimpleS7OpcClient.Constants;
 public enum PlcDataType
 {
     Invalid,
@@ -38,6 +33,5 @@ public enum PlcDataType
     DTL,
     Timer,
     Counter,
-    Array,
     Custom
 }

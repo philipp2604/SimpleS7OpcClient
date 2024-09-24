@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace SimpleS7OpcClient.Models;
 
-namespace SimpleS7OpcClient.Models;
 public class ConnectionSettings
 {
     public ConnectionSettings(string host, int port, int timeoutMs = 1000, int maxMsgSize = 65535)

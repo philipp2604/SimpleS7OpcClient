@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace SimpleS7OpcClient.Models;
 
-namespace SimpleS7OpcClient.Models;
 public class SessionSettings
 {
     public SessionSettings(string sessionName, int sessionTimeoutMs, bool anonymously)

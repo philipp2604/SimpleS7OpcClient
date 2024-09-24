@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="nauful-LibUA-core" Version="1.0.25" />
+    <ProjectReference Include="..\..\..\..\Downloads\LibUA-master\NET Core\LibUA\LibUA.csproj" />
   </ItemGroup>
 
 </Project>

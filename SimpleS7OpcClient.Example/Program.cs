@@ -9,6 +9,7 @@ internal static class Program
     private static void Main()
     {
         //Create S7OpcClient
+        //No encryption or anything - just anonymous mode
         var s7Client = new S7OpcClient(
             new ApplicationDescription("urn:DemoApp", "uri:DemoApp", "DemoApplication", ["en"]),
             new ConnectionSettings("172.168.0.1", 4840),

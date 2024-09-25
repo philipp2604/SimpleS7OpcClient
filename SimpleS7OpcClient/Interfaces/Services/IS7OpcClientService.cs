@@ -8,6 +8,10 @@ public interface IS7OpcClientService
 
     public void Disconnect();
 
+    public void RegisterCustomDataType(string typeId, Type type);
+
+    public void RegisterCustomDataType<T>(string typeId);
+
     public object? ReadSingleTableTag(string tagName, PlcDataType dataType, ushort namespaceId = 3);
 
     public object? ReadSingleDbVar(string varName, string dbName, PlcDataType dataType, bool isArray = false, ushort namespaceId = 3);

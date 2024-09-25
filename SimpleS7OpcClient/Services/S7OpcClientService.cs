@@ -68,6 +68,19 @@ public class S7OpcClientService(S7OpcClient client) : IS7OpcClientService
 
     public void Disconnect() => _client.Disconnect();
 
+    public void RegisterCustomDataType(string typeId, Type type)
+    {
+        if (string.IsNullOrWhiteSpace(typeId))
+            throw new ArgumentException("Type id cannot be null or whitespace.");
+
+        _customDataTypes.Add(typeId, type);
+    }
+
+    public void RegisterCustomDataType<T>(string typeId)
+    {
+        RegisterCustomDataType(typeId, typeof(T));
+    }
+
     public object? ReadSingleTableTag(string tagName, PlcDataType dataType, ushort namespaceId = 3)
     {
         if (string.IsNullOrWhiteSpace(tagName))
@@ -288,13 +301,37 @@ public class S7OpcClientService(S7OpcClient client) : IS7OpcClientService
             };
     }
 
-    private CustomDataType? TransformCustomDataTypeRead(DataValue value, bool isArray)
+    private object? TransformCustomDataTypeRead(DataValue value, bool isArray)
     {
-        if (value.Value is not ExtensionObject eo)
-            throw new InvalidDataException("Unexpected value. Expected an ExtensionObject.");
+        return !isArray ? TransformSingleCustomDataType(value) : TransformArrayCustomDataType(value);
+    }
 
+    private CustomDataType TransformSingleCustomDataType(DataValue value)
+    {
+        return value.Value is not ExtensionObject eo
+            ? throw new InvalidDataException("Unexpected value. Expected an ExtensionObject.")
+            : DecodeCustomDataType(eo);
+    }
+
+    private CustomDataType[] TransformArrayCustomDataType(DataValue value)
+    {
+        if (value.Value is not ExtensionObject[] eoArray)
+            throw new InvalidDataException("Unexpected value. Expected an array of ExtensionObjects.");
+
+        var result = new List<CustomDataType>();
+
+        foreach (var eo in eoArray)
+            result.Add(DecodeCustomDataType(eo));
+
+        return [.. result];
+    }
+
+    private CustomDataType DecodeCustomDataType(ExtensionObject eo)
+    {
         if (!_customDataTypes.TryGetValue(eo.TypeId.StringIdentifier, out var type))
+        {
             throw new InvalidDataException($"Unregistered custom data type: {eo.TypeId.StringIdentifier}");
+        }
 
         if (Activator.CreateInstance(type) is not CustomDataType instance)
             throw new InvalidDataException($"Failed to create an instance of the custom data type: {eo.TypeId.StringIdentifier}");
@@ -302,18 +339,5 @@ public class S7OpcClientService(S7OpcClient client) : IS7OpcClientService
         instance.Decode(eo.Body);
 
         return instance;
-    }
-
-    public void RegisterCustomDataType(string typeId, Type type)
-    {
-        if (string.IsNullOrWhiteSpace(typeId))
-            throw new ArgumentException("Type id cannot be null or whitespace.");
-
-        _customDataTypes.Add(typeId, type);
-    }
-
-    public void RegisterCustomDataType<T>(string typeId)
-    {
-        RegisterCustomDataType(typeId, typeof(T));
     }
 }

@@ -27,9 +27,15 @@ internal static class Program
         s7Service.Connect();
         Console.WriteLine("Conntected");
 
-        //Read variable 'TestCustom' of plc type 'TestDataType'
+        //Read variable 'TestCustom' of plc data type 'TestDataType'
         MyCustomDataType? testCustom = s7Service.ReadSingleDbVar("TestCustom", "DataDb", PlcDataType.Custom) as MyCustomDataType;
         Console.WriteLine($"TestCustom values: {testCustom!.Properties["MyTestBool"].value}  -  {testCustom!.Properties["MyTestInt"].value}");
+
+        //Read array 'TestCustom' of plc data type 'TestDataType'
+        CustomDataType[]? testCustomArray = s7Service.ReadSingleDbVar("TestCustomArray", "DataDb", PlcDataType.Custom, true) as CustomDataType[];
+        Console.Write("TestCustomArray values:");
+        testCustomArray!.ToList().ForEach((x) => Console.Write($" ({x.Properties["MyTestBool"].value}  -  {x.Properties["MyTestInt"].value})"));
+        Console.WriteLine();
 
         //Read tag 'TestInput' of type 'Bool'
         bool? testInput = (bool?)s7Service.ReadSingleTableTag("TestInput", PlcDataType.Bool);
@@ -42,6 +48,7 @@ internal static class Program
         string[]? testStringArray = (string[]?)s7Service.ReadSingleDbVar("TestStringArray", "DataDb", PlcDataType.String, true);
         Console.Write("TestStringArray values:");
         testStringArray!.ToList().ForEach((x) => Console.Write($" {x}"));
+        Console.WriteLine();
 
         //Write to array named 'TestDateAndTimeArray', an array of type 'Date_And_Time', in 'DataDb'
         //I recommand using PLC datatype LDT, which is compatible with .net DateTime

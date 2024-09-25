@@ -1,14 +1,9 @@
-﻿using LibUA.Core;
-using SimpleS7OpcClient.Constants;
+﻿using SimpleS7OpcClient.Constants;
 using SimpleS7OpcClient.Interfaces.Models;
 using SimpleS7OpcClient.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SimpleS7OpcClient.Example.Models;
+
 public class MyCustomDataType : CustomDataType, ICustomDataType
 {
     public MyCustomDataType()
@@ -30,7 +25,7 @@ public class MyCustomDataType : CustomDataType, ICustomDataType
         var myTestBoolValue = BitConverter.ToBoolean(dataArray, 0);
         var myTestIntValue = BitConverter.ToInt16(dataArray, 1);
 
-        _properties["MyTestBool"] = (PlcDataType.Bool,  myTestBoolValue);
+        _properties["MyTestBool"] = (PlcDataType.Bool, myTestBoolValue);
         _properties["MyTestInt"] = (PlcDataType.Int, myTestIntValue);
     }
 

@@ -41,7 +41,7 @@ internal static class Program
         //Read array named 'StringArray', an array of type 'String', from DataBlock 'DataDb'
         string[]? testStringArray = (string[]?)s7Service.ReadSingleDbVar("TestStringArray", "DataDb", PlcDataType.String, true);
         Console.Write("TestStringArray values:");
-        testStringArray!.ToList().ForEach((x) => Console.Write($" { x }"));
+        testStringArray!.ToList().ForEach((x) => Console.Write($" {x}"));
 
         //Write to array named 'TestDateAndTimeArray', an array of type 'Date_And_Time', in 'DataDb'
         //I recommand using PLC datatype LDT, which is compatible with .net DateTime

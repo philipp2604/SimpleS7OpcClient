@@ -1,4 +1,5 @@
 ﻿using SimpleS7OpcClient.Constants;
+using SimpleS7OpcClient.Example.Models;
 using SimpleS7OpcClient.Models;
 using SimpleS7OpcClient.Services;
 
@@ -19,9 +20,16 @@ internal static class Program
         //Create S7OpcClientService
         var s7Service = new S7OpcClientService(s7Client);
 
+        //Register custom data type
+        s7Service.RegisterCustomDataType<MyCustomDataType>(MyCustomDataType.TypeId);
+
         //Connect to server.
         s7Service.Connect();
         Console.WriteLine("Conntected");
+
+        //Read variable 'TestCustom' of plc type 'TestDataType'
+        MyCustomDataType? testCustom = s7Service.ReadSingleDbVar("TestCustom", "DataDb", PlcDataType.Custom) as MyCustomDataType;
+        Console.WriteLine($"TestCustom values: {testCustom!.Properties["MyTestBool"].value}  -  {testCustom!.Properties["MyTestInt"].value}");
 
         //Read tag 'TestInput' of type 'Bool'
         bool? testInput = (bool?)s7Service.ReadSingleTableTag("TestInput", PlcDataType.Bool);
@@ -32,8 +40,8 @@ internal static class Program
 
         //Read array named 'StringArray', an array of type 'String', from DataBlock 'DataDb'
         string[]? testStringArray = (string[]?)s7Service.ReadSingleDbVar("TestStringArray", "DataDb", PlcDataType.String, true);
-        Console.WriteLine("TestStringArray values:");
-        testStringArray!.ToList().ForEach((x) => Console.WriteLine(x));
+        Console.Write("TestStringArray values:");
+        testStringArray!.ToList().ForEach((x) => Console.Write($" { x }"));
 
         //Write to array named 'TestDateAndTimeArray', an array of type 'Date_And_Time', in 'DataDb'
         //I recommand using PLC datatype LDT, which is compatible with .net DateTime

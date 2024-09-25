@@ -2,8 +2,14 @@
 
 namespace SimpleS7OpcClient.Converters;
 
+/// <summary>
+/// Converters for <see cref="LibUA.Core.SecurityPolicy"/> values and <see cref="SecurityPolicy"/> values.
+/// </summary>
 public static class SecurityPolicyConverter
 {
+    /// <summary>
+    /// Converts <see cref="SecurityPolicy"/> values to <see cref="LibUA.Core.SecurityPolicy"/> values.
+    /// </summary>
     public static LibUA.Core.SecurityPolicy Convert(SecurityPolicy securityPolicy)
     {
         return securityPolicy switch
@@ -19,6 +25,9 @@ public static class SecurityPolicyConverter
         };
     }
 
+    /// <summary>
+    /// Converts <see cref="LibUA.Core.SecurityPolicy"/> values to <see cref="SecurityPolicy"/> values.
+    /// </summary>
     public static SecurityPolicy Convert(LibUA.Core.SecurityPolicy securityPolicy)
     {
         return securityPolicy switch

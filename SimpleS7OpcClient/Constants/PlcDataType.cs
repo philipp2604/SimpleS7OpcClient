@@ -1,5 +1,8 @@
 ﻿namespace SimpleS7OpcClient.Constants;
 
+/// <summary>
+/// Represent the data types that can be read / written.
+/// </summary>
 public enum PlcDataType
 {
     Invalid,

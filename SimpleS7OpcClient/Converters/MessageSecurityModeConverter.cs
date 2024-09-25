@@ -2,8 +2,14 @@
 
 namespace SimpleS7OpcClient.Converters;
 
+/// <summary>
+/// Converters for <see cref="LibUA.Core.MessageSecurityMode"/> values and <see cref="MessageSecurityMode"/> values.
+/// </summary>
 public static class MessageSecurityModeConverter
 {
+    /// <summary>
+    /// Converts <see cref="MessageSecurityMode"/> values to <see cref="LibUA.Core.MessageSecurityMode"/> values.
+    /// </summary>
     public static LibUA.Core.MessageSecurityMode Convert(MessageSecurityMode messageSecurityMode)
     {
         return messageSecurityMode switch
@@ -16,6 +22,9 @@ public static class MessageSecurityModeConverter
         };
     }
 
+    /// <summary>
+    /// Converts <see cref="LibUA.Core.MessageSecurityMode"/> values to <see cref="MessageSecurityMode"/> values.
+    /// </summary>
     public static MessageSecurityMode Convert(LibUA.Core.MessageSecurityMode messageSecurityMode)
     {
         return messageSecurityMode switch

@@ -12,6 +12,7 @@ public class S7OpcClientService(S7OpcClient client) : IS7OpcClientService
     private readonly S7OpcClient _client = client;
     private readonly Dictionary<string, Type> _customDataTypes = [];
 
+    /// <inheritdoc/>
     public void Connect()
     {
         _client.Connect();
@@ -66,8 +67,10 @@ public class S7OpcClientService(S7OpcClient client) : IS7OpcClientService
         }
     }
 
+    /// <inheritdoc/>
     public void Disconnect() => _client.Disconnect();
 
+    /// <inheritdoc/>
     public void RegisterCustomDataType(string typeId, Type type)
     {
         if (string.IsNullOrWhiteSpace(typeId))
@@ -76,11 +79,13 @@ public class S7OpcClientService(S7OpcClient client) : IS7OpcClientService
         _customDataTypes.Add(typeId, type);
     }
 
+    /// <inheritdoc/>
     public void RegisterCustomDataType<T>(string typeId)
     {
         RegisterCustomDataType(typeId, typeof(T));
     }
 
+    /// <inheritdoc/>
     public object? ReadSingleTableTag(string tagName, PlcDataType dataType, ushort namespaceId = 3)
     {
         if (string.IsNullOrWhiteSpace(tagName))
@@ -100,6 +105,7 @@ public class S7OpcClientService(S7OpcClient client) : IS7OpcClientService
             : throw new InvalidDataException("Unexpected number of values returned.");
     }
 
+    /// <inheritdoc/>
     public object? ReadSingleDbVar(string varName, string dbName, PlcDataType dataType, bool isArray = false, ushort namespaceId = 3)
     {
         if (string.IsNullOrWhiteSpace(varName))
@@ -122,6 +128,7 @@ public class S7OpcClientService(S7OpcClient client) : IS7OpcClientService
             : throw new InvalidDataException("Unexpected number of values returned.");
     }
 
+    /// <inheritdoc/>
     public void WriteSingleTableTag(string tagName, PlcDataType dataType, object value, ushort namespaceId = 3)
     {
         if (string.IsNullOrWhiteSpace(tagName))
@@ -145,6 +152,7 @@ public class S7OpcClientService(S7OpcClient client) : IS7OpcClientService
             throw new InvalidOperationException("Failed to write the value to the PLC.");
     }
 
+    /// <inheritdoc/>
     public void WriteSingleDbVar(string varName, string dbName, PlcDataType dataType, object value, bool isArray = false, ushort namespaceId = 3)
     {
         if (string.IsNullOrWhiteSpace(varName))

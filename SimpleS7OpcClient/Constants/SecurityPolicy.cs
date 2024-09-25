@@ -1,5 +1,8 @@
 ﻿namespace SimpleS7OpcClient.Constants;
 
+/// <summary>
+/// Represent the OPC UA Security Policies
+/// </summary>
 public enum SecurityPolicy
 {
     Invalid,

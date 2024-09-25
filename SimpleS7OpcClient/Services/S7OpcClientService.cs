@@ -10,6 +10,7 @@ namespace SimpleS7OpcClient.Services;
 public class S7OpcClientService(S7OpcClient client) : IS7OpcClientService
 {
     private readonly S7OpcClient _client = client;
+    private Dictionary<string, Type> _customDataTypes = new Dictionary<string, Type>();
 
     public void Connect()
     {
@@ -203,7 +204,7 @@ public class S7OpcClientService(S7OpcClient client) : IS7OpcClientService
         return null;
     }
 
-    private static object? TransformReadValue(PlcDataType dataType, DataValue value, bool isArray = false)
+    private object? TransformReadValue(PlcDataType dataType, DataValue value, bool isArray = false)
     {
         return value == null
             ? throw new ArgumentNullException(nameof(value), "DataValue cannot be null.")
@@ -240,7 +241,7 @@ public class S7OpcClientService(S7OpcClient client) : IS7OpcClientService
             PlcDataType.DTL => TransformReadDTL(value, isArray),
             PlcDataType.Timer => isArray ? value.Value as ushort[] : value.Value as ushort?,
             PlcDataType.Counter => isArray ? value.Value as ushort[] : value.Value as ushort?,
-            PlcDataType.Custom => throw new NotImplementedException(),
+            PlcDataType.Custom => TransformCustomDataTypeRead(value, isArray),
             _ => throw new NotImplementedException()
         };
     }
@@ -250,40 +251,73 @@ public class S7OpcClientService(S7OpcClient client) : IS7OpcClientService
         return value == null
             ? throw new ArgumentNullException(nameof(value), "Value cannot be null.")
             : dataType switch
-        {
-            PlcDataType.Invalid => throw new InvalidDataException(),
-            PlcDataType.Bool => value as bool?,
-            PlcDataType.Byte => value as byte?,
-            PlcDataType.Word => isArray ? value as ushort[] : value as ushort?,
-            PlcDataType.DWord => isArray ? value as uint[] : value as uint?,
-            PlcDataType.LWord => isArray ? value as ulong[] : value as ulong?,
-            PlcDataType.SInt => isArray ? value as sbyte[] : value as sbyte?,
-            PlcDataType.Int => isArray ? value as short[] : value as short?,
-            PlcDataType.DInt => isArray ? value as int[] : value as int?,
-            PlcDataType.USInt => isArray ? value as byte[] : value as byte?,
-            PlcDataType.UInt => isArray ? value as ushort[] : value as ushort?,
-            PlcDataType.UDInt => isArray ? value as uint[] : value as uint?,
-            PlcDataType.LInt => isArray ? value as long[] : value as long?,
-            PlcDataType.ULInt => isArray ? value as ulong[] : value as ulong?,
-            PlcDataType.Real => isArray ? value as float[] : value as float?,
-            PlcDataType.LReal => isArray ? value as double[] : value as double?,
-            PlcDataType.S5Time => isArray ? value as ushort[] : value as ushort?,
-            PlcDataType.Time => isArray ? value as int[] : value as int?,
-            PlcDataType.LTime => isArray ? value as long[] : value as long?,
-            PlcDataType.Char => isArray ? value as byte[] : value as byte?,
-            PlcDataType.WChar => isArray ? value as ushort[] : value as ushort?,
-            PlcDataType.String => isArray ? value as string[] : value as string,
-            PlcDataType.WString => isArray ? value as string[] : value as string,
-            PlcDataType.Date => isArray ? value as ushort[] : value as ushort?,
-            PlcDataType.Time_Of_Day => isArray ? value as uint[] : value as uint?,
-            PlcDataType.LTime_Of_Day => isArray ? value as ulong[] : value as ulong?,
-            PlcDataType.Date_And_Time => isArray ? value as byte[,] : value as byte[],
-            PlcDataType.LDT => isArray ? value as DateTime[] : value as DateTime?,
-            PlcDataType.DTL => isArray ? value as byte[,] : value as byte[],
-            PlcDataType.Timer => isArray ? value as ushort[] : value as ushort?,
-            PlcDataType.Counter => isArray ? value as ushort[] : value as ushort?,
-            PlcDataType.Custom => throw new NotImplementedException(),
+            {
+                PlcDataType.Invalid => throw new InvalidDataException(),
+                PlcDataType.Bool => value as bool?,
+                PlcDataType.Byte => value as byte?,
+                PlcDataType.Word => isArray ? value as ushort[] : value as ushort?,
+                PlcDataType.DWord => isArray ? value as uint[] : value as uint?,
+                PlcDataType.LWord => isArray ? value as ulong[] : value as ulong?,
+                PlcDataType.SInt => isArray ? value as sbyte[] : value as sbyte?,
+                PlcDataType.Int => isArray ? value as short[] : value as short?,
+                PlcDataType.DInt => isArray ? value as int[] : value as int?,
+                PlcDataType.USInt => isArray ? value as byte[] : value as byte?,
+                PlcDataType.UInt => isArray ? value as ushort[] : value as ushort?,
+                PlcDataType.UDInt => isArray ? value as uint[] : value as uint?,
+                PlcDataType.LInt => isArray ? value as long[] : value as long?,
+                PlcDataType.ULInt => isArray ? value as ulong[] : value as ulong?,
+                PlcDataType.Real => isArray ? value as float[] : value as float?,
+                PlcDataType.LReal => isArray ? value as double[] : value as double?,
+                PlcDataType.S5Time => isArray ? value as ushort[] : value as ushort?,
+                PlcDataType.Time => isArray ? value as int[] : value as int?,
+                PlcDataType.LTime => isArray ? value as long[] : value as long?,
+                PlcDataType.Char => isArray ? value as byte[] : value as byte?,
+                PlcDataType.WChar => isArray ? value as ushort[] : value as ushort?,
+                PlcDataType.String => isArray ? value as string[] : value as string,
+                PlcDataType.WString => isArray ? value as string[] : value as string,
+                PlcDataType.Date => isArray ? value as ushort[] : value as ushort?,
+                PlcDataType.Time_Of_Day => isArray ? value as uint[] : value as uint?,
+                PlcDataType.LTime_Of_Day => isArray ? value as ulong[] : value as ulong?,
+                PlcDataType.Date_And_Time => isArray ? value as byte[,] : value as byte[],
+                PlcDataType.LDT => isArray ? value as DateTime[] : value as DateTime?,
+                PlcDataType.DTL => isArray ? value as byte[,] : value as byte[],
+                PlcDataType.Timer => isArray ? value as ushort[] : value as ushort?,
+                PlcDataType.Counter => isArray ? value as ushort[] : value as ushort?,
+                PlcDataType.Custom => throw new NotImplementedException(),
             _ => throw new NotImplementedException()
-        };
+            };
+    }
+
+    private object? TransformCustomDataTypeRead(DataValue value,  bool isArray)
+    {
+        var eo = value.Value as ExtensionObject;
+
+        if(eo == null)
+            throw new InvalidDataException("Unexpected data type.");
+
+        if (!_customDataTypes.ContainsKey(eo.TypeId.StringIdentifier))
+            throw new InvalidDataException("Unregistered custom data type.");
+
+        var type = _customDataTypes[eo.TypeId.StringIdentifier];
+
+        var instance = (CustomDataType?)Activator.CreateInstance(type);
+        if (instance == null)
+            throw new InvalidDataException("Unregistered custom data type.");
+        instance.Decode(eo.Body);
+
+        return instance;
+    }
+
+    public void RegisterCustomDataType(string typeId, Type type)
+    {
+        if (string.IsNullOrWhiteSpace(typeId))
+            throw new ArgumentException("Type id cannot be null or whitespace.");
+
+        _customDataTypes.Add(typeId, type);
+    }
+
+    public void RegisterCustomDataType<T>(string typeId)
+    {
+        RegisterCustomDataType(typeId, typeof(T));
     }
 }

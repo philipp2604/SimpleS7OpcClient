@@ -24,8 +24,7 @@ public class MyCustomDataType : CustomDataType, ICustomDataType
 
     public override void Decode(object data)
     {
-        var dataArray = data as byte[];
-        if(dataArray == null || dataArray.Length != 3)
+        if (data is not byte[] dataArray || dataArray.Length != 3)
             throw new InvalidDataException("Data cannot be used to initiate the data type.");
 
         var myTestBoolValue = BitConverter.ToBoolean(dataArray, 0);

@@ -3,9 +3,7 @@ using SimpleS7OpcClient.Constants;
 using SimpleS7OpcClient.Converters;
 using SimpleS7OpcClient.Interfaces.Services;
 using SimpleS7OpcClient.Models;
-using System.ComponentModel.DataAnnotations;
 using System.Text;
-using System.Xml.Linq;
 
 namespace SimpleS7OpcClient.Services;
 
@@ -420,8 +418,8 @@ public class S7OpcClientService(S7OpcClient client) : IS7OpcClientService
     private byte[] EncodeCustomDataType(CustomDataType dataType)
     {
         var values = dataType.Encode() as byte[];
-        
-        if(values == null)
+
+        if (values == null)
             throw new InvalidDataException("Failed to encode the custom data type.");
 
         return values;

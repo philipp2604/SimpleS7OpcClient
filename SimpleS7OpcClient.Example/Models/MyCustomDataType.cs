@@ -17,8 +17,8 @@ public class MyCustomDataType : CustomDataType, ICustomDataType
     {
         _properties = new Dictionary<string, (PlcDataType dataType, object? value)>()
         {
-            { "MyTestBool", (PlcDataType.Bool, null) },
-            { "MyTestInt", (PlcDataType.Int, null) }
+            { "TestBool", (PlcDataType.Bool, null) },
+            { "TestInt", (PlcDataType.Int, null) }
         };
     }
 
@@ -40,8 +40,8 @@ public class MyCustomDataType : CustomDataType, ICustomDataType
         var myTestBoolValue = BitConverter.ToBoolean(dataArray, 0);
         var myTestIntValue = BitConverter.ToInt16(dataArray, 1);
 
-        _properties["MyTestBool"] = (PlcDataType.Bool, myTestBoolValue);
-        _properties["MyTestInt"] = (PlcDataType.Int, myTestIntValue);
+        _properties["TestBool"] = (PlcDataType.Bool, myTestBoolValue);
+        _properties["TestInt"] = (PlcDataType.Int, myTestIntValue);
     }
 
     /// <summary>
@@ -50,6 +50,19 @@ public class MyCustomDataType : CustomDataType, ICustomDataType
     /// <returns>An <see cref="object"/> that can be sent to the server.</returns>
     public override object? Encode()
     {
-        return null;
+        var myTestBoolValue = _properties["TestBool"].value as bool?;
+        if (myTestBoolValue == null)
+            throw new InvalidDataException("Unexpected data type stored in MyTestBool's value, expected a bool.");
+
+        var myTestIntValue = _properties["TestInt"].value as short?;
+        if (myTestIntValue == null)
+            throw new InvalidDataException("Unexpected data type stored in MyTestInt's value, expected a short.");
+
+        byte[] data = new byte[3];
+        data[0] = BitConverter.GetBytes((bool)myTestBoolValue)[0];
+        data[1] = BitConverter.GetBytes((short)myTestIntValue)[0];
+        data[2] = BitConverter.GetBytes((short) myTestIntValue)[1];
+
+        return data;
     }
 }

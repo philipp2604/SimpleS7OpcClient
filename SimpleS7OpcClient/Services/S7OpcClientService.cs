@@ -3,7 +3,9 @@ using SimpleS7OpcClient.Constants;
 using SimpleS7OpcClient.Converters;
 using SimpleS7OpcClient.Interfaces.Services;
 using SimpleS7OpcClient.Models;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
+using System.Xml.Linq;
 
 namespace SimpleS7OpcClient.Services;
 
@@ -155,6 +157,18 @@ public class S7OpcClientService(S7OpcClient client) : IS7OpcClientService
     /// <inheritdoc/>
     public void WriteSingleDbVar(string varName, string dbName, PlcDataType dataType, object value, bool isArray = false, ushort namespaceId = 3)
     {
+        if (dataType == PlcDataType.Custom)
+        {
+            WriteSingleDbVarCustomDataType(varName, dbName, dataType, value, isArray, namespaceId);
+        }
+        else
+        {
+            WriteSingleDbVarBuiltInDataType(varName, dbName, dataType, value, isArray, namespaceId);
+        }
+    }
+
+    private void WriteSingleDbVarBuiltInDataType(string varName, string dbName, PlcDataType dataType, object value, bool isArray = false, ushort namespaceId = 3)
+    {
         if (string.IsNullOrWhiteSpace(varName))
             throw new ArgumentException("Variable name cannot be null or whitespace.", nameof(varName));
 
@@ -163,11 +177,9 @@ public class S7OpcClientService(S7OpcClient client) : IS7OpcClientService
 
         if (value == null)
             throw new ArgumentNullException(nameof(value), "Value cannot be null.");
-
         string identifier = $"\"{dbName}\".\"{varName}\"";
 
         object sendVal = TransformWriteValue(value, dataType, isArray) ?? throw new InvalidDataException("Transformation of the write value failed.");
-
         var writeValues = new[]
         {
             new WriteValue(new NodeId(namespaceId, identifier), NodeAttribute.Value, null, new DataValue(sendVal, StatusCode.Good))
@@ -177,6 +189,45 @@ public class S7OpcClientService(S7OpcClient client) : IS7OpcClientService
 
         if (results == null || results.Length == 0 || results[0] != (uint)StatusCode.Good)
             throw new InvalidOperationException("Failed to write the value to the PLC.");
+    }
+
+    private void WriteSingleDbVarCustomDataType(string varName, string dbName, PlcDataType dataType, object value, bool isArray = false, ushort namespaceId = 3)
+    {
+        if (string.IsNullOrWhiteSpace(varName))
+            throw new ArgumentException("Variable name cannot be null or whitespace.", nameof(varName));
+
+        if (string.IsNullOrWhiteSpace(dbName))
+            throw new ArgumentException("DataBlock name cannot be null or whitespace.", nameof(dbName));
+
+        if (value == null)
+            throw new ArgumentNullException(nameof(value), "Value cannot be null.");
+
+        if (value is not CustomDataType valueCdt)
+            throw new InvalidDataException("Value is not of type 'CustomDataType'");
+
+        foreach (var property in valueCdt.Properties)
+        {
+            var propertyName = property.Key;
+            var propertyDt = property.Value.dataType;
+            var propertyVal = property.Value.value;
+
+            if (propertyVal == null)
+                throw new InvalidDataException($"Value of {propertyName} does not exist.");
+
+            var sendVal = TransformWriteValue(propertyVal, propertyDt, propertyVal.GetType().IsArray);
+
+            string identifier = $"\"{dbName}\".\"{varName}\".\"{propertyName}\"";
+
+            var writeValues = new[]
+            {
+                new WriteValue(new NodeId(namespaceId, identifier), NodeAttribute.Value, null, new DataValue(sendVal, StatusCode.Good))
+            };
+
+            _client.Write(writeValues, out uint[] results);
+
+            if (results == null || results.Length == 0 || results[0] != (uint)StatusCode.Good)
+                throw new InvalidOperationException("Failed to write the value to the PLC.");
+        }
     }
 
     private static object? TransformReadDateAndTime(DataValue value, bool isArray)
@@ -267,7 +318,7 @@ public class S7OpcClientService(S7OpcClient client) : IS7OpcClientService
             };
     }
 
-    private static object? TransformWriteValue(object value, PlcDataType dataType, bool isArray = false)
+    private object? TransformWriteValue(object value, PlcDataType dataType, bool isArray = false)
     {
         return value == null
             ? throw new ArgumentNullException(nameof(value), "Value cannot be null.")
@@ -304,7 +355,7 @@ public class S7OpcClientService(S7OpcClient client) : IS7OpcClientService
                 PlcDataType.DTL => isArray ? value as byte[,] : value as byte[],
                 PlcDataType.Timer => isArray ? value as ushort[] : value as ushort?,
                 PlcDataType.Counter => isArray ? value as ushort[] : value as ushort?,
-                PlcDataType.Custom => throw new NotImplementedException(),
+                PlcDataType.Custom => TransformCustomDataTypeWrite(value, isArray),
                 _ => throw new NotImplementedException()
             };
     }
@@ -314,11 +365,23 @@ public class S7OpcClientService(S7OpcClient client) : IS7OpcClientService
         return !isArray ? TransformSingleCustomDataType(value) : TransformArrayCustomDataType(value);
     }
 
+    private object? TransformCustomDataTypeWrite(object value, bool isArray)
+    {
+        return !isArray ? TransformSingleCustomDataType(value) : TransformArrayCustomDataType(value);
+    }
+
     private CustomDataType TransformSingleCustomDataType(DataValue value)
     {
         return value.Value is not ExtensionObject eo
             ? throw new InvalidDataException("Unexpected value. Expected an ExtensionObject.")
             : DecodeCustomDataType(eo);
+    }
+
+    private byte[] TransformSingleCustomDataType(object value)
+    {
+        return value is not CustomDataType data
+            ? throw new InvalidDataException("Unexpected value. Expected a CustomDataType.")
+            : EncodeCustomDataType(data);
     }
 
     private CustomDataType[] TransformArrayCustomDataType(DataValue value)
@@ -334,6 +397,11 @@ public class S7OpcClientService(S7OpcClient client) : IS7OpcClientService
         return [.. result];
     }
 
+    private CustomDataType[] TransformArrayCustomDataType(object value)
+    {
+        throw new NotImplementedException();
+    }
+
     private CustomDataType DecodeCustomDataType(ExtensionObject eo)
     {
         if (!_customDataTypes.TryGetValue(eo.TypeId.StringIdentifier, out var type))
@@ -347,5 +415,15 @@ public class S7OpcClientService(S7OpcClient client) : IS7OpcClientService
         instance.Decode(eo.Body);
 
         return instance;
+    }
+
+    private byte[] EncodeCustomDataType(CustomDataType dataType)
+    {
+        var values = dataType.Encode() as byte[];
+        
+        if(values == null)
+            throw new InvalidDataException("Failed to encode the custom data type.");
+
+        return values;
     }
 }

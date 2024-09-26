@@ -27,14 +27,21 @@ internal static class Program
         s7Service.Connect();
         Console.WriteLine("Conntected");
 
+
+        var x = new MyCustomDataType();
+        x.Properties["TestBool"] = (PlcDataType.Bool, false);
+        x.Properties["TestInt"] = (PlcDataType.Int, (short)123);
+
+        s7Service.WriteSingleDbVar("TestCustom", "DataDb", PlcDataType.Custom, x);
+
         //Read variable 'TestCustom' of plc data type 'TestDataType'
-        MyCustomDataType? testCustom = s7Service.ReadSingleDbVar("TestCustom", "DataDb", PlcDataType.Custom) as MyCustomDataType;
-        Console.WriteLine($"TestCustom values: {testCustom!.Properties["MyTestBool"].value}  -  {testCustom!.Properties["MyTestInt"].value}");
+        //MyCustomDataType? testCustom = s7Service.ReadSingleDbVar("TestCustom", "DataDb", PlcDataType.Custom) as MyCustomDataType;
+        //Console.WriteLine($"TestCustom values: {testCustom!.Properties["MyTestBool"].value}  -  {testCustom!.Properties["MyTestInt"].value}");
 
         //Read array 'TestCustom' of plc data type 'TestDataType'
         CustomDataType[]? testCustomArray = s7Service.ReadSingleDbVar("TestCustomArray", "DataDb", PlcDataType.Custom, true) as CustomDataType[];
         Console.Write("TestCustomArray values:");
-        testCustomArray!.ToList().ForEach((x) => Console.Write($" ({x.Properties["MyTestBool"].value}  -  {x.Properties["MyTestInt"].value})"));
+        testCustomArray!.ToList().ForEach((x) => Console.Write($" ({x.Properties["TestBool"].value}  -  {x.Properties["TestInt"].value})"));
         Console.WriteLine();
 
         //Read tag 'TestInput' of type 'Bool'

@@ -23,7 +23,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="nauful-LibUA-core" Version="1.0.25" />
+    <PackageReference Include="nauful-LibUA-core" Version="1.0.27" />
   </ItemGroup>
 
   <ItemGroup>
